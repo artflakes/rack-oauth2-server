@@ -1,4 +1,5 @@
 require "mongo"
+require "sequel"
 require "openssl"
 require "rack/oauth2/server/errors"
 require "rack/oauth2/server/utils"
@@ -38,20 +39,28 @@ module Rack
             @create_indexes = nil
           end
         end
+
+        def adapter
+          raise 'No Adapter configured. You must configure it using Server.adapter = :sequel or :mongodb' unless @adapter
+          @adapter
+        end
+
+        def adapter= new_adapter
+          unless @adapter == new_adapter
+            @adapter = new_adapter
+            require "rack/oauth2/models/#{new_adapter}"
+          end
+          @adapter
+        end
  
        	def database
       		raise 'No database Configured. You must configure it using Server.database = MongoDB::Connection.new()[db_name] ' unless @database
       		@database
  	 			end	
       end
- 
+
     end
   end
 end
 
-
-require "rack/oauth2/models/client"
-require "rack/oauth2/models/auth_request"
-require "rack/oauth2/models/access_grant"
-require "rack/oauth2/models/access_token"
 

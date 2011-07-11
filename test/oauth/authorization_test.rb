@@ -135,7 +135,8 @@ class AuthorizationTest < Test::Unit::TestCase
       end
 
       context "redirect URL query parameters" do
-        setup { @return = Rack::Utils.parse_query(URI.parse(last_response["Location"]).query) }
+        setup {
+          @return = Rack::Utils.parse_query(URI.parse(last_response["Location"]).query) }
 
         should "include authorization code" do
           assert_match /[a-f0-9]{32}/i, @return["code"]
@@ -231,7 +232,8 @@ class AuthorizationTest < Test::Unit::TestCase
       end
 
       context "redirect URL" do
-        setup { @return = Rack::Utils.parse_query(URI.parse(last_response["Location"]).fragment) }
+        setup {
+          @return = Rack::Utils.parse_query(URI.parse(last_response["Location"]).fragment) }
 
         should "not include authorization code" do
           assert !@return["code"]
@@ -289,7 +291,12 @@ class AuthorizationTest < Test::Unit::TestCase
 
   context "unregistered redirect URI" do
     setup do
-      Rack::OAuth2::Server::Client.collection.update({ :_id=>client._id }, { :$set=>{ :redirect_uri=>nil } })
+      case ENV["DATABASE_BACKEND"].to_sym
+      when :mongodb
+        Rack::OAuth2::Server::Client.collection.update({ :_id=>client._id }, { :$set=>{ :redirect_uri=>nil } })
+      when :sequel
+        Rack::OAuth2::Server::Client.collection.filter(:id => client.id).update(:redirect_uri => nil)
+      end
       request_authorization :redirect_uri=>"http://uberclient.dot/oz"
     end
     should_ask_user_for_authorization
