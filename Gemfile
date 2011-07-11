@@ -8,6 +8,7 @@ group :development do
 end
 
 group :test do
+  gem "sqlite3-ruby", :require => "sqlite3"
   gem "awesome_print"
   gem "json"
   gem "rack-test"
