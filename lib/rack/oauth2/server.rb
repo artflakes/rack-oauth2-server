@@ -148,7 +148,7 @@ module Rack
       #     user if user && user.authenticated?(password)
       #   end
       Options = Struct.new(:access_token_path, :authenticator, :authorization_types,
-        :authorize_path, :database, :host, :param_authentication, :path, :realm, :logger)
+        :authorize_path, :database, :host, :param_authentication, :path, :realm, :logger, :adapter)
 
       def initialize(app, options = Options.new, &authenticator)
         @app = app
@@ -171,6 +171,7 @@ module Rack
         begin
           # Use options.database if specified.
           org_database, Server.database = Server.database, options.database || Server.database
+          Server.adapter = options.adapter || Server.adapter
           logger = options.logger || env["rack.logger"]
 
           # 3.  Obtaining End-User Authorization
